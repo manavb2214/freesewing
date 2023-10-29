@@ -21,6 +21,7 @@ export const zpoints = {
   ],
   options: {
     ease: { pct: -20, min: -35, max: 10, menu: 'fit' },
+    length: { pct: 100, min: 10, max: 100, menu: 'fit' },
     crossSeamAngle: 35,
     crotchToKnee: 0.4,
     waistToKneeCP: 0.4,
@@ -63,42 +64,44 @@ export const zpoints = {
       }
     }
     const CreatePath = (pathName, names) => {
-      console.log({ pathName: pathName })
-      console.log({ i: 1, n: names[1], p2: points[names[1] + 'Cp2'], p3: points[names[1]] })
+      // console.log({ pathName: pathName })
+      // console.log({ i: 1, n: names[1], p2: points[names[1] + 'Cp2'], p3: points[names[1]] })
       paths[pathName] = new Path()
         .move(points[names[0]])
         ._curve(points[names[1] + 'Cp1'], points[names[1]])
-      console.log({ s: 0, l: paths[pathName].length() })
+      // console.log({ s: 0, l: paths[pathName].length() })
       for (var i = 2; i < names.length - 1; i++) {
-        console.log({
-          i: i,
-          n: names[i],
-          p1: points[names[i - 1] + 'Cp1'],
-          p2: points[names[i] + 'Cp2'],
-          p3: points[names[i]],
-        })
+        // console.log({
+        //   i: i,
+        //   n: names[i],
+        //   p1: points[names[i - 1] + 'Cp1'],
+        //   p2: points[names[i] + 'Cp2'],
+        //   p3: points[names[i]],
+        // })
         paths[pathName].curve(
           points[names[i - 1] + 'Cp2'],
           points[names[i] + 'Cp1'],
           points[names[i]]
         )
-        console.log({
-          s: i - 1,
-          l: new Path()
-            .move(points[names[i - 1]])
-            .curve(points[names[i - 1] + 'Cp2'], points[names[i] + 'Cp1'], points[names[i]])
-            .length(),
-        })
+        // console.log({
+        //   s: i - 1,
+        //   l: new Path()
+        //     .move(points[names[i - 1]])
+        //     .curve(points[names[i - 1] + 'Cp2'], points[names[i] + 'Cp1'], points[names[i]])
+        //     .length(),
+        // })
       }
-      console.log({ i: i, n: names[i], p2: points[names[i] + 'Cp2'], p3: points[names[i]] })
+      // console.log({ i: i, n: names[i], p2: points[names[i] + 'Cp2'], p3: points[names[i]] })
       paths[pathName].curve_(points[names[i - 1] + 'Cp2'], points[names[i]])
+
+      return paths[pathName]
     }
 
     const CreateWaistPoint = (front) => {
-      console.log({
-        crossSeamAngle: options.crossSeamAngle,
-        crotchPointsCP: options.crotchPointsCP,
-      })
+      // console.log({
+      //   crossSeamAngle: options.crossSeamAngle,
+      //   crotchPointsCP: options.crotchPointsCP,
+      // })
       const kneeTemp = points.insideCrossSeam.shiftFractionTowards(
         points.insideKnee,
         options.crotchToKnee
@@ -117,7 +120,7 @@ export const zpoints = {
         options.crotchPointsCP
       )
 
-      console.log({ f: front, a: angle })
+      // console.log({ f: front, a: angle })
       var waistCp
       var diff,
         iter = 0
@@ -159,8 +162,10 @@ export const zpoints = {
       ease,
       distanceCompentation
     ) => {
-      console.log('-----' + prefix + postfix + '----')
-      var measurement, width
+      // console.log('-----' + prefix + postfix + '----')
+      var measurement,
+        width,
+        lastGood = 0
       for (var i = 0; i < names.length; i++) {
         var distance =
           m['waistTo' + names[i - 1]] -
@@ -176,7 +181,7 @@ export const zpoints = {
               points[prefix + 'WaistCp'],
               points[prefix + 'Waist']
             )
-            console.log({ intersect: intersect })
+            // console.log({ intersect: intersect })
             measurement += intersect.dist(points[prefix + names[i]])
             break
           case 'Waist':
@@ -193,13 +198,13 @@ export const zpoints = {
 
         width = measurement * ratio
 
-        console.log({
-          ratio: ratio,
-          ratioFixed: ratioFixed,
-          width: width,
-          distance: distance,
-          dc: distanceCompentation,
-        })
+        // console.log({
+        //   ratio: ratio,
+        //   ratioFixed: ratioFixed,
+        //   width: width,
+        //   distance: distance,
+        //   dc: distanceCompentation,
+        // })
         if (i == 0) {
           points[prefix + postfix + names[i]] = points[prefix + names[i]].shift(
             prefix == 'front' ? 180 : 0,
@@ -207,46 +212,46 @@ export const zpoints = {
           ) //.addCircle(3).addCircle(6).addCircle(9)
           points[prefix + names[i]] //.addCircle(width < ratioFixed ? width : ratioFixed)
         } else {
-          console.log({
-            n1: prefix + names[i],
-            n2: prefix + postfix + names[i - 1],
-            m1: 'waistTo' + names[i - 1],
-            m2: 'waistTo' + names[i],
-            d: distance,
-          })
-          console.log({
-            p1: points[prefix + names[i]],
-            p2: points[prefix + postfix + names[i - 1]],
-            m1: m['waistTo' + names[i - 1]],
-            m2: m['waistTo' + names[i]],
-            w: width < ratioFixed ? width : ratioFixed,
-            d: points[prefix + names[i]].dist(points[prefix + names[i - 1]]),
-          })
+          // console.log({
+          //   n1: prefix + names[i],
+          //   n2: prefix + postfix + names[lastGood],
+          //   m1: 'waistTo' + names[i],
+          //   m2: 'waistTo' + names[lastGood],
+          //   d: distance,
+          //   w: measurement - width < ratioFixed ? width : measurement - ratioFixed
+          // })
+          // console.log({
+          //   p1: points[prefix + names[i]],
+          //   p2: points[prefix + postfix + names[lastGood]],
+          //   m1: m['waistTo' + names[i]],
+          //   m2: m['waistTo' + names[lastGood]],
+          //   w: width < ratioFixed ? width : ratioFixed,
+          //   d: points[prefix + names[i]].dist(points[prefix + names[lastGood]]),
+          // })
 
           var ci = utils.circlesIntersect(
             points[prefix + names[i]],
             // width < ratioFixed ? width : ratioFixed,
             // measurement - width < ratioFixed ? ratioFixed : measurement - width,
             measurement - width < ratioFixed ? width : measurement - ratioFixed,
-            points[prefix + postfix + names[i - 1]],
+            points[prefix + postfix + names[lastGood]],
             distance
           )
-          console.log({ ci: ci })
+          // console.log({ ci: ci })
 
           // points[ prefix +postfix +names[i-1] ].addCircle(distance)
           // points[prefix +names[i]].addCircle(width < ratioFixed ? width : ratioFixed)
 
           if (false !== ci) {
             points[prefix + postfix + names[i]] = ci[prefix == 'front' ? 0 : 1] //.addCircle(2).addCircle(4).addCircle(6)
+            lastGood = i
           } else {
             // break
-            points[prefix + postfix + names[i]] = points[prefix + postfix + names[i - 1]].clone()
+            points[prefix + postfix + names[i]] = points[prefix + postfix + names[lastGood]].clone()
 
-            points[prefix + postfix + names[i - 1]].addCircle(distance)
+            points[prefix + postfix + names[lastGood]] //.addCircle(distance)
             // points[prefix +names[i]].addCircle(width < ratioFixed ? width : ratioFixed)
-            points[prefix + names[i]].addCircle(
-              measurement - width < ratioFixed ? width : measurement - ratioFixed
-            )
+            points[prefix + names[i]] //.addCircle(measurement - width < ratioFixed ? width : measurement - ratioFixed)
           }
         }
       }
@@ -256,20 +261,20 @@ export const zpoints = {
       var adjust
       for (var i = 0; i < names.length - 2; i++) {
         adjust = false
-        console.log({
-          n1: names[i],
-          n2: names[i + 1],
-          n3: names[i + 2],
-        })
-        console.log({
-          smooth1: points[prefix + postfix + names[i]],
-          smooth2: points[prefix + postfix + names[i + 1]],
-          smooth3: points[prefix + postfix + names[i + 2]],
-        })
-        console.log({
-          a1: points[prefix + postfix + names[i]].angle(points[prefix + postfix + names[i + 1]]),
-          a2: points[prefix + postfix + names[i]].angle(points[prefix + postfix + names[i + 2]]),
-        })
+        // console.log({
+        //   n1: names[i],
+        //   n2: names[i + 1],
+        //   n3: names[i + 2],
+        // })
+        // console.log({
+        //   smooth1: points[prefix + postfix + names[i]],
+        //   smooth2: points[prefix + postfix + names[i + 1]],
+        //   smooth3: points[prefix + postfix + names[i + 2]],
+        // })
+        // console.log({
+        //   a1: points[prefix + postfix + names[i]].angle(points[prefix + postfix + names[i + 1]]),
+        //   a2: points[prefix + postfix + names[i]].angle(points[prefix + postfix + names[i + 2]]),
+        // })
         if (prefix == 'front') {
           adjust =
             points[prefix + postfix + names[i]].angle(points[prefix + postfix + names[i + 1]]) >
@@ -296,6 +301,7 @@ export const zpoints = {
     const waistFrontBackRatio = m.waistBack / m.waist
     const sideRatio = 3 / 5
     const ease = options.ease + 1
+    const waistToAnkle = m.waistToFloor - m.heel / Math.PI
 
     m['waistToAnkle'] = m.waistToFloor - m.heel / Math.PI
     // m['waistToWaist'] = 0;
@@ -303,15 +309,15 @@ export const zpoints = {
     // const sideFixed = (((m.seat - m.seatBack) * ease) / 2) * sideRatio
     const sideFixed = (((m.waist - m.waistBack) * ease) / 2) * sideRatio
 
-    console.log({
-      waistFrontBackRatio: waistFrontBackRatio,
-      sideFixed: sideFixed,
-      waist: m.waist,
-      waistb: m.waistBack,
-    })
+    // console.log({
+    //   waistFrontBackRatio: waistFrontBackRatio,
+    //   sideFixed: sideFixed,
+    //   waist: m.waist,
+    //   waistb: m.waistBack,
+    // })
 
-    console.log({ m: JSON.parse(JSON.stringify(m)) })
-    console.log({ wfr: waistFrontBackRatio })
+    // console.log({ m: JSON.parse(JSON.stringify(m)) })
+    // console.log({ wfr: waistFrontBackRatio })
 
     points.insideWaist = new Point(0, 0)
     points.insideHips = points.insideWaist.shift(270, m.waistToHips)
@@ -331,7 +337,7 @@ export const zpoints = {
     points.frontAnkle =
       points.backAnkle =
       points.insideAnkle =
-        points.insideWaist.shift(270, m.waistToFloor - m.heel / Math.PI)
+        points.insideWaist.shift(270, waistToAnkle)
     points.frontFloor =
       points.backFloor =
       points.insideFloor =
@@ -346,14 +352,16 @@ export const zpoints = {
 
     console.log({ pionts: JSON.parse(JSON.stringify(points)) })
 
-    paths.middle = new Path().move(points.insideUpperLeg).line(points.insideFloor)
+    paths.middle = new Path().move(points.insideUpperLeg).line(points.insideFloor).hide()
 
     paths.crossSeamFront = new Path()
       .move(points.insideCrossSeam)
       .curve(points.frontCrossSeamCp, points.frontWaistCp, points.frontWaist)
+      .hide()
     paths.crossSeamBack = new Path()
       .move(points.insideCrossSeam)
       .curve(points.backCrossSeamCp, points.backWaistCp, points.backWaist)
+      .hide()
 
     let csFront = paths.crossSeamFront.length()
     let csBack = paths.crossSeamBack.length()
@@ -363,19 +371,19 @@ export const zpoints = {
     points.frontSeat = paths.crossSeamFront
       .reverse()
       .shiftAlong(m.waistToSeat * (m.crossSeamFront / m.waistToUpperLeg) * 0.8)
-      .addCircle(6)
+    // .addCircle(6)
     points.frontHips = paths.crossSeamFront
       .reverse()
       .shiftAlong(m.waistToHips * (m.crossSeamFront / m.waistToUpperLeg))
-      .addCircle(10)
+    // .addCircle(10)
     points.backSeat = paths.crossSeamBack
       .reverse()
       .shiftAlong(m.waistToSeat * (m.waistToSeat / m.waistToUpperLeg))
-      .addCircle(6)
+    // .addCircle(6)
     points.backHips = paths.crossSeamBack
       .reverse()
       .shiftAlong(m.waistToHips * (m.waistToSeat / m.waistToUpperLeg))
-      .addCircle(10)
+    // .addCircle(10)
 
     CreateSidePoints(
       'front',
@@ -474,10 +482,152 @@ export const zpoints = {
           prefix + type + 'UpperLeg',
           prefix + type + 'Knee',
           prefix + type + 'Ankle',
-        ])
+        ]).hide()
       })
     })
 
+    if (1 == 2) {
+      ;['front', 'back'].forEach((prefix) => {
+        ;['Waist', 'Seat', 'UpperLeg', 'Knee', 'Ankle'].forEach((name) => {
+          var measurement
+          switch (name) {
+            case 'UpperLeg':
+              measurement = m.upperLeg
+            //   measurement = m['upperLeg']
+            //   const intersect = utils.beamIntersectsCurve(
+            //     points[prefix + names[i]],
+            //     points[prefix + names[i]].shift(prefix == 'front' ? 180 : 0, ratioFixed * 3),
+            //     points.insideCrossSeam,
+            //     points[prefix + 'CrossSeamCp'],
+            //     points[prefix + 'WaistCp'],
+            //     points[prefix + 'Waist']
+            //   )
+            //   console.log({ intersect: intersect })
+            //   measurement += intersect.dist(points[prefix + names[i]])
+            //   break
+            case 'Waist':
+              measurement = prefix == 'front' ? m.waist - m.waistBack : m.waistBack
+              break
+            case 'Seat':
+              measurement = prefix == 'front' ? m.seat - m.seatBack : m.seatBack
+              break
+            default:
+              measurement = m[name.toLowerCase()]
+          }
+
+          points[prefix + 'Panel' + name] = points['inside' + name].shift(
+            prefix == 'front' ? 180 : 0,
+            measurement / 2 - points[prefix + name].dist(points[prefix + 'Split' + name])
+          ) //.addCircle(4)
+        })
+      })
+
+      SmoothPoints('front', 'Panel', ['Ankle', 'Knee', 'UpperLeg', 'Seat', 'Waist'])
+      SmoothPoints('back', 'Panel', ['Ankle', 'Knee', 'UpperLeg', 'Seat', 'Waist'])
+      paths.frontPanel = new Path()
+        .move(points.frontPanelAnkle)
+        .line(points.frontPanelKnee)
+        .line(points.frontPanelUpperLeg)
+        .line(points.frontPanelSeat)
+        .line(points.frontPanelWaist)
+      paths.backPanel = new Path()
+        .move(points.backPanelAnkle)
+        .line(points.backPanelKnee)
+        .line(points.backPanelUpperLeg)
+        .line(points.backPanelSeat)
+        .line(points.backPanelWaist)
+    }
+    if (1 == 1) {
+      ;['front', 'back'].forEach((prefix) => {
+        ;['Waist', 'Seat', 'UpperLeg', 'Knee', 'Ankle'].forEach((name) => {
+          points[prefix + 'Panel' + name] = points['inside' + name].shift(
+            prefix == 'front' ? 180 : 0,
+            points[prefix + 'Side' + name].dist(points[prefix + 'Split' + name])
+          ) //.addCircle(4)
+        })
+      })
+
+      // SmoothPoints('front', 'Panel', ['Ankle', 'Knee', 'UpperLeg', 'Seat', 'Waist'])
+      // SmoothPoints('back', 'Panel', ['Ankle', 'Knee', 'UpperLeg', 'Seat', 'Waist'])
+      ;['front', 'back'].forEach((prefix) => {
+        CreateControlPoints([
+          prefix + 'Panel' + 'Waist',
+          prefix + 'Panel' + 'Seat',
+          prefix + 'Panel' + 'UpperLeg',
+          prefix + 'Panel' + 'Knee',
+          prefix + 'Panel' + 'Ankle',
+        ])
+      })
+      ;['front', 'back'].forEach((prefix) => {
+        CreatePath(prefix + 'Panel', [
+          prefix + 'Panel' + 'Waist',
+          prefix + 'Panel' + 'Seat',
+          prefix + 'Panel' + 'UpperLeg',
+          prefix + 'Panel' + 'Knee',
+          prefix + 'Panel' + 'Ankle',
+        ]).hide()
+      })
+
+      console.log({
+        fsl: paths.frontSplit.length(),
+        fpl: paths.frontPanel.length(),
+        bsl: paths.backSplit.length(),
+        bpl: paths.backPanel.length(),
+      })
+      ;['front', 'back'].forEach((prefix) => {
+        const diff = paths[prefix + 'Split'].length() / paths[prefix + 'Panel'].length(),
+          names = ['Waist', 'Seat', 'UpperLeg', 'Knee', 'Ankle']
+        for (i = 0; i < names.length - 1; i++) {
+          points[prefix + 'Panel' + names[i]] = points[
+            prefix + 'Panel' + names[i + 1]
+          ].shiftFractionTowards(points[prefix + 'Panel' + names[i]], diff)
+        }
+      })
+      ;['front', 'back'].forEach((prefix) => {
+        CreateControlPoints([
+          prefix + 'Panel' + 'Waist',
+          prefix + 'Panel' + 'Seat',
+          prefix + 'Panel' + 'UpperLeg',
+          prefix + 'Panel' + 'Knee',
+          prefix + 'Panel' + 'Ankle',
+        ])
+      })
+      ;['front', 'back'].forEach((prefix) => {
+        CreatePath(prefix + 'Panel', [
+          prefix + 'Panel' + 'Waist',
+          prefix + 'Panel' + 'Seat',
+          prefix + 'Panel' + 'UpperLeg',
+          prefix + 'Panel' + 'Knee',
+          prefix + 'Panel' + 'Ankle',
+        ]).hide()
+      })
+    }
+
+    console.log({
+      fsl: paths.frontSplit.length(),
+      fpl: paths.frontPanel.length(),
+      bsl: paths.backSplit.length(),
+      bpl: paths.backPanel.length(),
+    })
+
+    if (options.length < 1) {
+      const length = (1 - options.length) * (m.inseam - (m.waistToFloor - waistToAnkle))
+      console.log({ wtf: m.waistToFloor, i: m.inseam, l: length })
+      // console.log({i:m.inseam,wa:waistToAnkle,iw:(m.inseam/waistToAnkle),r:lengthRatio})
+      ;['front', 'back'].forEach((prefix) => {
+        ;['Side', 'Split', 'Panel'].forEach((type) => {
+          console.log({ n: prefix + type, l: paths[prefix + type].length() })
+          points[prefix + type + 'Hem'] = paths[prefix + type].reverse().shiftAlong(length)
+          paths[prefix + type] = paths[prefix + type].split(points[prefix + type + 'Hem'])[0].hide()
+        })
+      })
+    } else {
+      ;['front', 'back'].forEach((prefix) => {
+        ;['Side', 'Split', 'Panel'].forEach((type) => {
+          points[prefix + type + 'Hem'] = points[prefix + type + 'Ankle']
+        })
+      })
+    }
     // ;['front', 'back'].forEach((prefix) => {
     //   ;['Side'].forEach((type) => {
     //     paths[prefix + type] = new Path()
@@ -506,6 +656,7 @@ export const zpoints = {
     // console.log({d1: points.frontKnee.dist(points.frontUpperLeg),d2: points.frontSplitKnee.dist(points.frontSplitUpperLeg)})
 
     console.log({ pahts: JSON.parse(JSON.stringify(paths)) })
+    console.log({ pihts: JSON.parse(JSON.stringify(points)) })
 
     // paths.frontSide = new Path()
     //   .move(points.frontSideAnkle)
@@ -513,7 +664,7 @@ export const zpoints = {
     //   .line(points.frontSideUpperLeg)
     //   .line(points.frontSideSeat)
     //   .line(points.frontSideWaist)
-    return part
+    return part.hide()
 
     const waistAngle = utils.rad2deg(
       Math.asin((points.waistBack.y - points.waistFront.y) / (m.waist / 2))
