@@ -1,8 +1,8 @@
-import { zpoints } from './zpoints.mjs'
+import { points } from './points.mjs'
 
 export const leg = {
   name: 'luminous.leg',
-  from: zpoints,
+  from: points,
   draft: ({ sa, Point, points, Path, paths, Snippet, snippets, options, macro, part }) => {
     paths.seam = new Path()
       .move(points.frontSplitHem)
